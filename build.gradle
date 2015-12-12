@@ -28,4 +28,5 @@ dependencies {
 
 run {
     jvmArgs "-javaagent:${configurations.quasar.iterator().next()}" // gradle should make this simpler, too
+    systemProperty "co.paralleluniverse.actors.moduleDir", "${rootProject.projectDir}/modules"
 }
