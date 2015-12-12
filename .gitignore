@@ -1,5 +1,5 @@
 
-# Created by https://www.gitignore.io/api/java,gradle
+# Created by https://www.gitignore.io/api/java,gradle,vim
 
 ### Java ###
 *.class
@@ -28,4 +28,13 @@ gradle-app.setting
 
 # Cache of project
 .gradletasknamecache
+
+
+### Vim ###
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+*~
 
