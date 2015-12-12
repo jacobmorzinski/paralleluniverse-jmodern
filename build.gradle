@@ -20,8 +20,9 @@ configurations {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    compile "co.paralleluniverse:quasar-core:0.5.0:jdk8"
-    quasar "co.paralleluniverse:quasar-core:0.5.0:jdk8"
+    compile "co.paralleluniverse:quasar-core:0.5.0"
+    compile "co.paralleluniverse:quasar-actors:0.5.0"
+    quasar "co.paralleluniverse:quasar-core:0.5.0"
     testCompile 'junit:junit:4.12'
 }
 
