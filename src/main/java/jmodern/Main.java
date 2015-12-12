@@ -9,13 +9,13 @@ public class Main {
     public static void main(String[] args) throws Exception {
         final Channel<Integer> ch = Channels.newChannel(0);
 
-        new Fiber<Void>(() -> {
-            for (int i = 0; i < 10; i++) {
-                Strand.sleep(100);
-                ch.send(i);
-            }
-            ch.close();
-        }).start();
+	new Thread(Strand.toRunnable(() -> {
+	    for (int i = 0; i < 10; i++) {
+		Strand.sleep(100);
+		ch.send(i);
+	    }
+	    ch.close();
+	})).start();
 
         new Fiber<Void>(() -> {
             Integer x;
