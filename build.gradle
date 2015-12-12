@@ -1,7 +1,7 @@
 
 apply plugin: 'java'
 apply plugin: 'application'
- 
+
 sourceCompatibility = '1.8'
 
 mainClassName = 'jmodern.Main'
@@ -12,13 +12,25 @@ repositories {
     mavenCentral()
 }
 
+
+configurations {
+    markdownDoclet
+}
+
+
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    // The production code uses the SLF4J logging API at compile time
-    compile 'org.slf4j:slf4j-api:1.7.13'
     compile 'com.google.guava:guava:17.0'
 
     testCompile 'junit:junit:4.12'
+
+    markdownDoclet 'ch.raffael.pegdown-doclet:pegdown-doclet:1.1.1'
+}
+
+javadoc.options {
+    docletpath = configurations.markdownDoclet.files.asType(List) // gradle should relly make this simpler
+    doclet = "ch.raffael.doclets.pegdown.PegdownDoclet"
+    addStringOption("parse-timeout", "10")
 }
 
 run {
