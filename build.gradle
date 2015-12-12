@@ -12,6 +12,7 @@ repositories {
 configurations {
     quasar
     capsule
+    jolokia
     all*.exclude group: "org.apache.logging.log4j", module: "*"
 }
 
@@ -20,6 +21,8 @@ dependencies {
     compile "co.paralleluniverse:quasar-actors:0.5.0"
     compile "org.slf4j:slf4j-api:1.7.7"    // the SLF4J API
     runtime "org.slf4j:slf4j-jdk14:1.7.7"  // SLF4J binding for java.util.logging
+    runtime "org.jolokia:jolokia-core:1.2.1"
+    jolokia "org.jolokia:jolokia-jvm:1.2.1:agent"
 
     quasar "co.paralleluniverse:quasar-core:0.5.0"
 
@@ -54,7 +57,8 @@ task capsule(type: Jar, dependsOn: classes) {
             'Min-Java-Version' : '1.8.0',
             'JVM-Args' : run.jvmArgs.join(' '),
             'System-Properties' : run.systemProperties.collect { k,v -> "$k=$v" }.join(' '),
-            'Java-Agents' : getDependencies(configurations.quasar).iterator().next(),
+            'Java-Agents' : getDependencies(configurations.quasar).iterator().next()
+		+ " ${getDependencies(configurations.jolokia).iterator().next()}=port=7777,host=localhost",
             'Dependencies': getDependencies(configurations.runtime).join(' ')
         )
     }
@@ -63,5 +67,5 @@ task capsule(type: Jar, dependsOn: classes) {
 
 
 run {
-    jvmArgs "-javaagent:${configurations.quasar.iterator().next()}"
+    jvmArgs "-javaagent:${configurations.jolokia.iterator().next()}=port=7777,host=localhost"
 }
