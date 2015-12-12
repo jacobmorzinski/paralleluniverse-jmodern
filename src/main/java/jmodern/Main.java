@@ -1,48 +1,42 @@
 package jmodern;
 
-import co.paralleluniverse.fibers.Fiber;
-import co.paralleluniverse.strands.Strand;
-import co.paralleluniverse.strands.channels.Channel;
-import co.paralleluniverse.strands.channels.Channels;
-import co.paralleluniverse.strands.channels.SelectAction;
-import static co.paralleluniverse.strands.channels.Selector.*;
+import co.paralleluniverse.fibers.*;
+import co.paralleluniverse.fibers.io.*;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.*;
+import java.nio.charset.*;
 
 public class Main {
+    static final int PORT = 1234;
+    static final Charset charset = Charset.forName("UTF-8");
+
     public static void main(String[] args) throws Exception {
-        final Channel<Integer> ch1 = Channels.newChannel(0);
-        final Channel<String> ch2 = Channels.newChannel(0);
-
-        new Fiber<Void>(() -> {
-            for (int i = 0; i < 10; i++) {
-                Strand.sleep(100);
-                ch1.send(i);
-            }
-            ch1.close();
-        }).start();
-
-        new Fiber<Void>(() -> {
-            for (int i = 0; i < 10; i++) {
-                Strand.sleep(130);
-                ch2.send(Character.toString((char)('a' + i)));
-            }
-            ch2.close();
-        }).start();
-
-        new Fiber<Void>(() -> {
-            for (int i = 0; i < 10; i++) {
-                SelectAction<Object> sa
-                        = select(receive(ch1),
-                                receive(ch2));
-                switch (sa.index()) {
-                    case 0:
-                        System.out.println(sa.message() != null ? "Got a number: " + (int) sa.message() : "ch1 closed");
-                        break;
-                    case 1:
-                        System.out.println(sa.message() != null ? "Got a string: " + (String) sa.message() : "ch2 closed");
-                        break;
+        new Fiber(() -> {
+            try {
+                System.out.println("Starting server");
+                FiberServerSocketChannel socket = FiberServerSocketChannel.open().bind(new InetSocketAddress(PORT));
+                for (;;) {
+                    FiberSocketChannel ch = socket.accept();
+                    new Fiber(() -> {
+                        try {
+                            ByteBuffer buf = ByteBuffer.allocateDirect(1024);
+                            int n = ch.read(buf);
+                            String response = "HTTP/1.0 200 OK\r\nDate: Fri, 31 Dec 1999 23:59:59 GMT\r\n"
+                                            + "Content-Type: text/html\r\nContent-Length: 0\r\n\r\n";
+                            n = ch.write(charset.newEncoder().encode(CharBuffer.wrap(response)));
+                            ch.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        }).start().join(); // join waits for this fiber to finish
+        }).start();
+        System.out.println("started");
+        Thread.sleep(Long.MAX_VALUE);
     }
 }
 
